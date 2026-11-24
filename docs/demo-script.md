@@ -9,5 +9,4 @@
 | 1:50–2:10 | Follow the route to the lab and show the final turn count. | The delivery is complete after one wait and four moves. |
 | 2:10–2:30 | Open the district selector and show one additional district. | The same planner also handles blocked lanes and slow terrain. |
 
-For the live defense, allow 3–5 minutes for the demo, show the Python output and invite the audience to choose a signal. Record the video separately and add the final recording or its accessible link to the repository.
 
