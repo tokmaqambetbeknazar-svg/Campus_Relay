@@ -1,10 +1,10 @@
 # AI usage declaration
 
-ChatGPT/Codex assisted with designing and implementing the 3D browser simulation, integrating A*, Bayesian inference and the one-step decision model, developing additional districts, and preparing the Python reference, tests, documentation and presentation.
+Our team developed a 3D browser game in English where a robot makes deliveries across districts with different obstacles. We used ChatGPT/Codex for guidance and hands-on help with parts of the simulation, including level design and the integration of A* pathfinding, Bayesian inference, and a one-step decision model.
 
-Requests included building an English-language delivery game, adding levels with different obstacles, explaining the three algorithms with numerical examples, and preparing the repository for submission.
+We also asked for numerical examples to help us explain how the robot chooses a route, interprets a sensor reading, and decides what to do next. ChatGPT/Codex helped us prepare the Python reference implementation, tests, documentation, presentation, and GitHub repository for submission.
 
-Verification performed during AI-assisted development included running the Python reference, comparing its results with hand-calculable probabilities and checking delivery logic through automated scenarios. The sensor probabilities, rewards and maps are synthetic.
+During development, the Python reference was run, its probability outputs were compared with values that can be calculated by hand, and automated scenarios were used to check the delivery logic. The maps, sensor probabilities, and rewards were created for the simulation.
 
-Team members should disclose any additional tools they used and describe the checks they personally performed during the defense.
+During the defense, each team member will explain their own contribution, the checks they personally performed, and any additional tools they used.
 
