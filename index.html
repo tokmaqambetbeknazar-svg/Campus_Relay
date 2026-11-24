@@ -1,0 +1,426 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Signal // Blackout — Campus Relay 3D</title><style>*{box-sizing:border-box}body{margin:0;background:radial-gradient(at 20% 0%,#1c3042,transparent 65%),#09121b;color:#eff5f7;font:16px system-ui,sans-serif;min-height:100vh}#campus{max-width:1360px;margin:auto;padding:clamp(16px,3vw,44px)}button,select{font:inherit;color:inherit;background:#203342;border:1px solid #415965;border-radius:8px;padding:9px 13px;cursor:pointer}button:hover:enabled{border-color:#80e8cb}button:disabled{opacity:.46;cursor:default}button:focus-visible,summary:focus-visible,select:focus-visible{outline:2px solid #aaffcb;outline-offset:3px}.relayHead,.sceneCaption,.relayLegend,.camTools,.drivePad{display:flex;gap:8px;align-items:center}.relayHead,.sceneCaption{justify-content:space-between}.relayHead{margin-bottom:20px}.relayHead small,.sceneCaption,.relayLegend,.drivePad span,summary,.line,pre,.menuOptions label{font:12px ui-monospace,monospace}.relayHead small{color:#a8dbbc;letter-spacing:.14em}.relayHead h2{font-size:clamp(28px,4vw,52px);letter-spacing:-.05em;margin:3px 0}.relayLayout{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,.32fr);gap:24px}.relayScene{position:relative;background:#192b40;border:1px solid #536773;border-radius:14px;overflow:hidden}.relayScene canvas{width:100%;height:auto;aspect-ratio:100/66;display:block;touch-action:none;cursor:grab}.sceneCaption{position:absolute;inset:12px 14px auto;pointer-events:none}.sceneCaption span,#relayWin{background:#132331e8;border-radius:5px;padding:6px 9px}.sceneCaption span:first-child{color:#ffcf88}#relayWin{position:absolute;bottom:5%;left:50%;transform:translateX(-50%);color:#c9ff9f;white-space:nowrap;font-weight:700}.camTools,.relayLegend,.drivePad{flex-wrap:wrap;margin:12px 0}.relayLegend{color:#9eb2bd;gap:16px}.relayLegend span:nth-child(2){color:#78edcb}.relayConsole{background:#14232e;border:1px solid #304551;align-self:start;padding:18px;border-radius:12px;display:grid;gap:8px}.relayConsole h3{margin:0;font-size:22px}.relayConsole p,#deliveryStatus{color:#c5d6dc;line-height:1.5;margin:5px 0 12px}.drivePad span{width:100%}.drivePad button{padding:7px}.primary{background:#b8f598;color:#14231b;font-weight:700;padding:14px}.traceButton{background:#224b4b}details{border-top:1px solid #344756;margin-top:12px;padding-top:16px}summary{cursor:pointer;color:#b5d1cf}.menuOptions{display:flex;gap:20px;flex-wrap:wrap;margin:16px 0}select{display:block;margin-top:6px}.line{display:flex;gap:15px;justify-content:space-between;max-width:400px;padding:5px 0}.trace{background:#111f29;padding:12px;white-space:pre-wrap;max-height:200px;overflow:auto;color:#abced0}footer{font-size:12px;color:#93a8b6;margin-top:20px}@media(max-width:780px){.relayLayout{grid-template-columns:1fr;gap:6px}.relayHead{margin-bottom:10px}.relayConsole{padding:12px}.camTools button{padding:6px 10px}}.levelPicker{margin-left:auto;margin-right:14px;font:12px ui-monospace,monospace}.relayHead{flex-wrap:wrap}#levelBrief{color:#a6dbc8;font-size:14px;line-height:1.5}#nextLevel{background:#255647}@media(max-width:600px){.levelPicker{margin:0}.relayHead>div{width:100%}} </style></head><body><main id="campus" aria-labelledby="relayName"><header class="relayHead"><div><small>SIGNAL // BLACKOUT</small><h2 id="relayName">Campus Relay <small>3D</small></h2></div><label class="levelPicker">Delivery district<select id="levelSelect"><option>1 / Relay Courtyard</option><option>2 / Freight Depot</option><option>3 / Flooded Gardens</option><option>4 / Midnight Rail Yard</option></select></label><button id="soundBtn" aria-pressed="false">Sound off</button></header><div class="relayLayout"><section><div class="relayScene"><div class="sceneCaption"><span id="powerTag">● OFFLINE</span><span id="clockTag">TURN 00</span></div><canvas id="district" width="720" height="500" aria-label="Interactive 3D campus. Drag to orbit and scroll to zoom."></canvas><div id="relayWin" hidden>POWER RESTORED</div></div><div class="camTools"><button id="camLeft" aria-label="Rotate left">↶</button><button id="camRight" aria-label="Rotate right">↷</button><button id="zoomOut" aria-label="Zoom out">−</button><button id="zoomIn" aria-label="Zoom in">+</button><button id="camMode">Follow rover</button></div><div class="relayLegend"><span>▣ Depot → lab</span><span>━ Planned route</span><span>┄ Direct route</span></div><p role="status" id="deliveryStatus"></p></section><section class="relayConsole"><h3>Deliver power to the lab</h3><p id="levelBrief"></p><p role="status" id="missionHint"></p><div class="drivePad" aria-label="Manual driving controls"><span>Manual drive · WASD or arrows</span><button id="drivew" aria-label="North">W ↑</button><button id="drivea" aria-label="West">A ←</button><button id="drives" aria-label="South">S ↓</button><button id="drived" aria-label="East">D →</button></div><button id="dispatch" class="primary">Move one tile</button><button id="nextLevel" hidden>Next district →</button><button id="ping" class="traceButton">Scan the gate · Q</button><button id="retryRelay" class="subtle">Restart delivery</button></section></div><details><summary>Mission settings, algorithm trace &amp; project files</summary><div class="menuOptions"><label>Opening signal (restarts delivery)<select id="reading"><option>CLEAR</option><option selected>ALERT</option></select></label><label>Route strategy<select id="routeMode"><option>A* planner</option><option>Direct corridor</option></select></label></div><div id="math" class="aiContent"></div><pre class="trace" id="steps"></pre><button class="subtle" id="getPy">Download Python</button> <button class="subtle" id="getReadme">Download README</button></details><footer>AI Fundamentals · Arlan Mustafin &amp; Beknazar Tokmagambet</footer></main><script>
+'use strict';
+const $=id=>document.getElementById(id),key=(x,y)=>x+','+y,dist=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
+let sound=false;
+$('soundBtn').onclick=()=>{sound=!sound;$('soundBtn').textContent=sound?'Sound on':'Sound off';$('soundBtn').setAttribute('aria-pressed',String(sound));if(sound)tone()};
+function tone(freq=480,dur=.06){if(!sound)return;try{let a=tone.audio||(tone.audio=new(window.AudioContext||window.webkitAudioContext)()),o=a.createOscillator(),g=a.createGain();o.type='triangle';o.frequency.value=freq;g.gain.setValueAtTime(.04,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+dur);o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+dur)}catch{}}
+function pathfind(map,start,goal,{risk={},avoid=[]}={}){ // A* with Manhattan heuristic and nonnegative risk costs
+ const pq=[{x:start.x,y:start.y,g:0,f:dist(start,goal)}],cost=new Map([[key(start.x,start.y),0]]),parent=new Map(),closed=new Set(),exp=[];
+ const blocked=new Set(avoid.map(p=>key(p.x,p.y)));
+ while(pq.length){pq.sort((a,b)=>a.f-b.f||a.g-b.g);let n=pq.shift(),k=key(n.x,n.y);if(closed.has(k))continue;closed.add(k);exp.push({x:n.x,y:n.y,g:n.g,f:n.f});if(n.x===goal.x&&n.y===goal.y){let route=[{x:n.x,y:n.y}];while(parent.has(k)){let v=parent.get(k);route.push(v);k=key(v.x,v.y)}return{path:route.reverse(),expanded:exp,cost:n.g}}
+ for(const [dx,dy] of [[0,-1],[1,0],[0,1],[-1,0]]){let x=n.x+dx,y=n.y+dy,v=key(x,y);if(y<0||y>=map.length||x<0||x>=map[y].length||map[y][x]===1||blocked.has(v))continue;let g=n.g+1+Math.max(0,risk[v]||0);if(g<(cost.get(v)??Infinity)){cost.set(v,g);parent.set(v,{x:n.x,y:n.y});pq.push({x,y,g,f:g+Math.abs(x-goal.x)+Math.abs(y-goal.y)})}}}
+ return{path:[],expanded:exp,cost:Infinity};}
+function bayes(prior,positive,sensitivity=.85,falsePositive=.2){let hit=positive?sensitivity:1-sensitivity,miss=positive?falsePositive:1-falsePositive,den=hit*prior+miss*(1-prior);return{prior,positive,sensitivity,falsePositive,posterior:den?hit*prior/den:prior,numerator:hit*prior,denominator:den}}
+const levels=[
+  {
+    "name": "Relay Courtyard",
+    "hint": "Deliver the relay around two buildings. Scan the gate to compare the direct route and the detour.",
+    "ground": [
+      "#54666b",
+      "#596c70"
+    ],
+    "rows": [
+      ".....",
+      "..B..",
+      "SG..L",
+      "...B.",
+      "....."
+    ]
+  },
+  {
+    "name": "Freight Depot",
+    "hint": "Stacked containers block entire lanes. Steel grates are passable but take two turns to cross.",
+    "ground": [
+      "#75695c",
+      "#82796a"
+    ],
+    "rows": [
+      "S.G=..",
+      "CC.CC.",
+      ".C.==.",
+      "...CC.",
+      "CC...C",
+      "....=L"
+    ]
+  },
+  {
+    "name": "Flooded Gardens",
+    "hint": "Deep pools block the rover. Shallow water costs two turns per tile; boardwalks are faster.",
+    "ground": [
+      "#47695c",
+      "#557564"
+    ],
+    "rows": [
+      "L..WW..",
+      ".W.~~..",
+      ".W.WW..",
+      "...G...",
+      "WW.W.~W",
+      "..~..~.",
+      "S..WW.."
+    ]
+  },
+  {
+    "name": "Midnight Rail Yard",
+    "hint": "Cross the tracks when their lamps are green. A red crossing holds the rover for one turn. Barricades close the service lanes.",
+    "ground": [
+      "#555d76",
+      "#626b80"
+    ],
+    "rows": [
+      "...X...L",
+      ".X.X.X..",
+      "..=..X..",
+      "XXXRRXXX",
+      "...G....",
+      ".X.XXX..",
+      ".X...X=.",
+      "S..X...."
+    ]
+  }
+];
+let levelIndex=0,level,size,gate,depot,lab,campusMap,terrainCost;
+function configureLevel(index){
+ levelIndex=index;level=levels[index];size=level.rows.length;terrainCost={};
+ campusMap=level.rows.map((row,y)=>Array.from(row,(tile,x)=>{
+  if(tile==='S')depot={x,y};if(tile==='G')gate={x,y};if(tile==='L')lab={x,y};
+  if('~='.includes(tile))terrainCost[key(x,y)]=1;
+  return 'BCWX'.includes(tile)?1:0;
+ }));
+ $('levelSelect').selectedIndex=index;$('levelBrief').textContent=level.hint;
+ resetDelivery();
+}
+function crossingClosed(){return turns%3===0}
+$('levelSelect').onchange=()=>configureLevel($('levelSelect').selectedIndex);
+$('nextLevel').onclick=()=>configureLevel((levelIndex+1)%levels.length);
+
+let robot,plan,action,ended,posterior,evidence,turns,waits,scans,moves,frame=0,pingStart=-Infinity,motion;
+const previousRuns=new Map();
+function readGate(prior,alert){
+ evidence=bayes(prior,alert,.8,.2);
+ posterior=evidence.posterior;scans++;
+ pingStart=performance.now();
+}
+function resetDelivery(){
+ robot={...depot}; ended=false;turns=waits=scans=moves=0;
+ motion={from:robot,start:-1000};
+ Object.assign(view3D,{yaw:.68,pitch:.66,zoom:10.1,mode:'orbit',heading:Math.PI/2,drag:null});$('camMode').textContent='Follow rover';
+ readGate(.30,$('reading').value==='ALERT');
+ $('deliveryStatus').textContent='Relay loaded. Follow the illuminated route to the lab.';
+ drawDelivery();
+}
+function drawDelivery(){
+ const optimal=pathfind(campusMap,robot,lab,{risk:{...terrainCost,[key(gate.x,gate.y)]:4*posterior}});
+ plan=$('routeMode').selectedIndex===0?optimal:pathfind(campusMap,robot,lab);
+ $('nextLevel').hidden=!ended;$('nextLevel').textContent=levelIndex===levels.length-1?'Return to first district':'Next district →';
+ const next=plan.path[1],p=next&&dist(next,gate)===0?posterior:0;
+ const move=3-8*p;action=move>=-1?'MOVE':'WAIT';
+ $('math').innerHTML=[['Gate risk',(posterior*100).toFixed(1)+'%'],['Route',plan.path.length-1+' steps'],['Policy',ended?'DOCKED':action]].map(([k,v])=>'<div class="line"><span>'+k+'</span><strong>'+v+'</strong></div>').join('');
+ $('steps').textContent=[
+ 'Scripted sensor: selected opening signal, then CLEAR on each rescan.',
+ 'Fixed gate state; readings assumed conditionally independent.',
+ 'Prior '+evidence.prior.toFixed(4)+'; P(alert | blocked) = 0.80; P(alert | clear) = 0.20.',
+ 'P(blocked | '+(evidence.positive?'alert':'clear')+') = '+evidence.numerator.toFixed(4)+' / '+evidence.denominator.toFixed(4)+' = '+posterior.toFixed(4),
+ 'A*: step cost 1; slow terrain adds 1; gate penalty 4p. h = Manhattan distance. Rail signals are checked on arrival.',
+ 'Optimal cost '+optimal.cost.toFixed(2)+'; expanded (x,y; g,f):',
+ optimal.expanded.map(n=>'('+n.x+','+n.y+'; '+n.g.toFixed(2)+','+n.f.toFixed(2)+')').join(' '),
+ 'Selected route: '+plan.path.map(n=>'('+n.x+','+n.y+')').join(' → '),
+ 'One-step MDP: MOVE gives +3 clear, -5 blocked. WAIT gives -1.',
+ 'Next tile risk '+p.toFixed(4)+'; Q(move) = 3 - 8p = '+move.toFixed(2)+'; Q(wait) = -1.'
+ ].join('\n');
+ $('missionHint').textContent=ended?'Delivery complete. The lab is back online.':action==='WAIT'?'The gate ahead may be blocked. Wait one turn for a new reading.':'Follow the route one tile at a time or drive manually. Steps remaining: '+(plan.path.length-1)+'.';
+ $('dispatch').textContent=ended?'Replay delivery':action==='WAIT'?'Wait and rescan':'Follow route →';
+ for(const key of ['w','a','s','d'])$('drive'+key).disabled=ended;
+ $('clockTag').textContent='TURN '+String(turns).padStart(2,'0');
+ $('powerTag').textContent=ended?'● POWER ONLINE':'● POWER OFFLINE';
+ $('relayWin').hidden=!ended;$('ping').disabled=ended;$('routeMode').disabled=ended;repaint();
+}
+function rescan(waiting){
+ if(ended)return;
+ turns++;if(waiting)waits++;
+ readGate(posterior,false);
+ $('deliveryStatus').textContent=(waiting?'Held position for one turn. ':'Gate scanned. ')+'CLEAR reading. Blockage risk: '+(posterior*100).toFixed(1)+'%.';
+ tone(640,.1);drawDelivery();
+}
+$('dispatch').onclick=()=>{
+ if(ended){resetDelivery();return}
+ if(action==='WAIT'){rescan(true);return}
+ moveCourier(plan.path[1]);
+};
+function animatedPosition(now){
+ const t=Math.min(1,Math.max(0,(now-motion.start)/400)),blend=t*t*(3-2*t);
+ return {x:motion.from.x+(robot.x-motion.from.x)*blend,y:motion.from.y+(robot.y-motion.from.y)*blend};
+}
+function moveCourier(next){
+ const tile=level.rows[next.y][next.x];
+ if(tile==='R'&&crossingClosed()){
+  turns++;waits++;$('deliveryStatus').textContent='Red crossing. You waited one turn. The signal is now green.';drawDelivery();return;
+ }
+ const delay=terrainCost[key(next.x,next.y)]||0;
+ turns+=delay;
+ view3D.heading=Math.atan2(next.x-robot.x,next.y-robot.y);
+ turns++;moves++;motion={from:animatedPosition(performance.now()),start:performance.now()};robot=next;ended=dist(robot,lab)===0;
+ if(ended){
+  const scenario=levelIndex+':'+$('reading').value,previous=previousRuns.get(scenario);
+  $('deliveryStatus').textContent='Delivered! Turns: '+turns+' · moves: '+moves+' · waits: '+waits+'.'+(previous!==undefined?' Previous run: '+previous+' turns.':'');
+  previousRuns.set(scenario,turns);tone(880,.3);
+ }else{$('deliveryStatus').textContent='Rover position: ('+robot.x+', '+robot.y+').'+(delay?' Slow terrain added one turn.':'');tone(360,.035)}
+ drawDelivery();
+};
+$('ping').onclick=()=>rescan(false);$('retryRelay').onclick=resetDelivery;
+$('reading').onchange=resetDelivery;$('routeMode').onchange=()=>{drawDelivery();$('deliveryStatus').textContent='Route updated from the current position.'};
+window.addEventListener('keydown',e=>{if((e.code==='KeyQ'||e.key.toLowerCase()==='q')&&!e.repeat&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&e.target.tagName!=='SELECT'){e.preventDefault();rescan(false)}});
+
+
+const view3D={yaw:.68,pitch:.66,zoom:10.1,drag:null,mode:'orbit',heading:Math.PI/2};
+const palette3D=new Map();
+function shade3D(hex,light){
+ const k=hex+':'+Math.round(light*50);
+ if(!palette3D.has(k)){
+  const c=parseInt(hex.slice(1),16),t=Math.round(light*50)/50;
+  palette3D.set(k,'rgb('+[c>>16,c>>8&255,c&255].map(v=>Math.min(255,Math.round(v*t))).join(',')+')');
+ }
+ return palette3D.get(k);
+}
+
+function createWorldRenderer(){
+ const surface=document.createElement('canvas');
+ const gl=surface.getContext('webgl',{alpha:true,antialias:true,depth:true});
+ if(!gl||typeof gl.createShader!=='function')return null;
+ const program=gl.createProgram();
+ function compile(type,source){
+  const shader=gl.createShader(type);gl.shaderSource(shader,source);gl.compileShader(shader);
+  if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(shader));
+  gl.attachShader(program,shader);gl.deleteShader(shader);
+ }
+ compile(gl.VERTEX_SHADER,`attribute vec3 position, color;
+ uniform vec3 target; uniform vec4 rotation; uniform vec2 lens; uniform float distanceToTarget;
+ varying lowp vec3 tint;
+ void main(){
+  vec3 v=position-target;
+  float forward=v.x*rotation.y+v.z*rotation.x;
+  float depth=distanceToTarget-forward*rotation.z-v.y*rotation.w;
+  float horizontal=v.x*rotation.x-v.z*rotation.y;
+  float vertical=v.y*rotation.z-forward*rotation.w;
+  gl_Position=vec4(horizontal*lens.x,vertical*lens.y-.06*depth,1.004*depth-.2004,depth);
+  tint=mix(color,vec3(.18,.25,.32),smoothstep(12.,28.,depth)*.55);
+ }`);
+ compile(gl.FRAGMENT_SHADER,`precision mediump float; varying lowp vec3 tint;
+ void main(){gl_FragColor=vec4(tint,1.);}`);
+ gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));
+ const buffer=gl.createBuffer();gl.useProgram(program);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+ for(const [name,offset] of [['position',0],['color',12]]){
+  const attr=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(attr);gl.vertexAttribPointer(attr,3,gl.FLOAT,false,24,offset);
+ }
+ const u=Object.fromEntries(['target','rotation','lens','distanceToTarget'].map(k=>[k,gl.getUniformLocation(program,k)]));
+ gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.clearColor(0,0,0,0);
+ surface.addEventListener('webglcontextlost',e=>{e.preventDefault();gpu=null;repaint()});
+ surface.addEventListener('webglcontextrestored',()=>{gpu=tryWorldRenderer();repaint()});
+ return {surface,draw(faces,width,height,target,rotation,distance){
+  if(surface.width!==width||surface.height!==height){surface.width=width;surface.height=height}
+  gl.viewport(0,0,width,height);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  gl.uniform3fv(u.target,target);gl.uniform4fv(u.rotation,rotation);
+  gl.uniform2f(u.lens,2.94*height/width,2.94);gl.uniform1f(u.distanceToTarget,distance);
+  const data=[];
+  for(const {vertices,hex,brightness} of faces){
+   const c=parseInt(hex.slice(1),16),rgb=[c>>16,c>>8&255,c&255].map(n=>Math.min(1,n*brightness/255));
+   for(let i=1;i<vertices.length-1;i++)for(const point of [vertices[0],vertices[i],vertices[i+1]])data.push(...point,...rgb);
+  }
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.DYNAMIC_DRAW);gl.drawArrays(gl.TRIANGLES,0,data.length/6);
+ }};
+}
+function tryWorldRenderer(){try{return createWorldRenderer()}catch(error){console.warn('Using the software 3D renderer.',error);return null}}
+let gpu=tryWorldRenderer();
+
+function paintCampus(now){
+ const canvas=$('district'),ctx=canvas.getContext('2d');
+ const scale=Math.min(window.devicePixelRatio||1,2),w=canvas.clientWidth||720,h=Math.round(w*.66);
+ if(canvas.width!==Math.round(w*scale)||canvas.height!==Math.round(h*scale)){canvas.width=Math.round(w*scale);canvas.height=Math.round(h*scale)}
+ ctx.setTransform(scale,0,0,scale,0,0);
+ const sky=ctx.createLinearGradient(0,0,0,h);sky.addColorStop(0,'#18263c');sky.addColorStop(.58,'#466075');sky.addColorStop(1,'#192f3d');
+ ctx.fillStyle=sky;ctx.fillRect(0,0,w,h);
+ const t=Math.min(1,Math.max(0,(now-motion.start)/400)),ease=t*t*(3-2*t);
+ const rx=motion.from.x+(robot.x-motion.from.x)*ease,rz=motion.from.y+(robot.y-motion.from.y)*ease;
+ const center=(size-1)/2;
+ const following=view3D.mode==='follow',tx=following?rx:center,tz=following?rz:center,ty=.25;
+ const yaw=view3D.yaw,pitch=view3D.pitch,cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+ const distance=following?view3D.zoom*.62:view3D.zoom*(size/5);
+ const focal=h*1.47;
+ function project([x,y,z]){
+  x-=tx;y-=ty;z-=tz;
+  const d=distance-(x*sy+z*cy)*cp-y*sp;
+  return [w*.5+focal*(x*cy-z*sy)/d,h*.53-focal*(y*cp-(x*sy+z*cy)*sp)/d,d];
+ }
+ const faces=[];let layer=0;
+ function face(vertices,color,brightness=1,edge=false){
+  if(gpu){faces.push({vertices,hex:color,brightness});return}
+  const pts=vertices.map(project);
+  if(pts.some(p=>p[2]<.12))return;
+  const bounds=pts.every(p=>p[0]<0)||pts.every(p=>p[0]>w)||pts.every(p=>p[1]<0)||pts.every(p=>p[1]>h);
+  if(!bounds)faces.push({layer,pts,color:shade3D(color,brightness),edge,depth:pts.reduce((a,p)=>a+p[2],0)/pts.length});
+ }
+ function box(x,y,z,a,b,c,col,rot=0){
+  const co=Math.cos(rot),si=Math.sin(rot);
+  const ring=v=>[[-a,-c],[a,-c],[a,c],[-a,c]].map(([u,k])=>[x+(u*co+k*si)/2,v,z+(-u*si+k*co)/2]);
+  const lo=ring(y),hi=ring(y+b);
+  for(let i=0;i<4;i++){const j=(i+1)%4,nx=[0,1,0,-1][i],nz=[-1,0,1,0][i];
+   const X=nx*co+nz*si,Z=-nx*si+nz*co;
+   if((tx+distance*sy*cp-x)*X+(tz+distance*cy*cp-z)*Z>0)face([lo[i],lo[j],hi[j],hi[i]],col,.68+.25*Math.max(0,-X*.6+Z*.8));
+  }
+  face(hi,col,1.12);
+ }
+ function floor(x,z,a,b,col,y=.014){
+  face([[x-a/2,y,z-b/2],[x+a/2,y,z-b/2],[x+a/2,y,z+b/2],[x-a/2,y,z+b/2]],col);
+ }
+ function lamp(x,z){
+  box(x,0,z,.045,.68,.045,'#779296');box(x,.67,z,.17,.045,.1,'#ffe9a2');
+ }
+ function block(x,z,a,b,height,skin,windows){
+  box(x,0,z,a+.04,.07,b+.04,'#425866');box(x,.07,z,a,height,b,skin);
+  box(x,height+.07,z,a+.055,.05,b+.055,'#afc1bf');
+  box(x-.07,height+.12,z,.24,.12,.2,'#597580');
+  for(let i=-1;i<=1;i++)for(let j=0;j<Math.max(1,Math.floor(height/.3));j++){
+   const y=.18+j*.29;
+   box(x+i*a*.27,y,z+b/2+.01,a*.15,.105,.016,windows);
+   box(x+i*a*.27,y,z-b/2-.01,a*.15,.105,.016,windows);
+   box(x+a/2+.01,y,z+i*b*.27,.016,.105,b*.15,windows);
+  }
+ }
+ // A distant skyline sets the scale of the miniature campus.
+ for(let i=0;i<15;i++){
+  const angle=i*2.39996,rad=8+(i%3)*.8,bx=2+Math.cos(angle)*rad,bz=2+Math.sin(angle)*rad;
+  if((bx-2)*sy+(bz-2)*cy>-.8)continue;
+  box(bx,-8,bz,.65+(i%3)*.3,8.1+(i*7%11)*.20,.9,'#526777');
+ }
+ layer=1;box(center,-.34,center,size+.45,.32,size+.45,'#344c59');
+ layer=2;for(let z=0;z<size;z++)for(let x=0;x<size;x++){
+  floor(x,z,.985,.985,level.ground[(x+z)%2],0);
+  for(const k of [-.40,.40])floor(x+k,z-.40,.03,.08,'#90a0a1');
+ }
+ for(let i=0;i<size;i++){
+  floor(i,-.57,.82,.035,'#f2bb66');floor(i,size-.43,.82,.035,ended?'#c7ff91':'#72a5ad');
+ }
+ function strip(u,v,width,col,y){
+  const dx=v.x-u.x,dz=v.y-u.y;
+  floor((u.x+v.x)/2,(u.y+v.y)/2,dx?Math.abs(dx):width,dz?Math.abs(dz):width,col,y);
+ }
+ layer=3;const direct=pathfind(campusMap,robot,lab).path;
+ for(let i=1;i<direct.length;i++){
+  const u=direct[i-1],v=direct[i];
+  for(const n of [.20,.55,.9])floor(u.x+(v.x-u.x)*n,u.y+(v.y-u.y)*n,.07,.07,'#d1c2a6',.023);
+ }
+ for(let i=1;i<plan.path.length;i++)strip(plan.path[i-1],plan.path[i],.07,'#69ffd4',.032);
+ floor(depot.x,depot.y,.72,.72,'#ad915f',.021);floor(lab.x,lab.y,.78,.78,ended?'#88bc7e':'#6083a8',.021);
+ layer=5;
+ for(let z=0;z<size;z++)for(let x=0;x<size;x++){
+  const tile=level.rows[z][x];
+  if(tile==='B')block(x,z,.77,.76,.72,'#8095a0','#a9dddc');
+  if(tile==='C'){
+   box(x,0,z,.84,.42,.66,'#b47150');
+   for(let i=-2;i<=2;i++)box(x+i*.15,.025,z,.035,.42,.68,'#d69b6c');
+   if((x+z)%2===0)box(x,.44,z,.76,.31,.62,'#637e92');
+  }
+  if(tile==='X'){
+   box(x,.02,z,.8,.36,.30,'#edb962');
+   for(const dx of [-.26,0,.26])box(x+dx,.03,z,.11,.35,.31,'#3d4b54');
+  }
+  if(tile==='W'||tile==='~'){
+   layer=2;floor(x,z,.97,.97,tile==='W'?'#21516a':'#48878d',.016);
+   for(const d of [-.23,.12])floor(x+d,z+d,.3,.025,'#83bbc2',.018);layer=5;
+  }
+  if(tile==='='||tile==='R'){
+   layer=2;floor(x,z,.96,.98,'#464951',.017);
+   for(let j=-2;j<=2;j++)floor(x+j*.19,z,.05,.89,'#8a8982',.019);
+   if(tile==='R'){
+    for(const d of [-.3,.3])floor(x,z+d,.97,.044,'#d3d5cb',.02);
+    layer=5;box(x+.38,0,z-.37,.055,.31,.055,'#485362');box(x+.38,.31,z-.37,.12,.1,.12,crossingClosed()?'#ff675e':'#93ed9f');
+   }
+   layer=5;
+  }
+ }
+ const lx=lab.x,lz=lab.y-.42;
+ block(lx,lz,.62,.38,.52,'#829eaf',ended?'#e8ff99':'#5f8798');
+ box(lx,.65,lz,.04,.34,.04,'#afbdc1');box(lx,.98,lz,.09,.075,.09,ended?'#a5ff8c':'#ff835d');
+ for(const d of [-.22,.12])box(depot.x+d,0,depot.y-.35,.25,.20,.24,'#c38d52');
+ for(const d of [-.38,.38])box(gate.x,0,gate.y+d,.08,.27,.08,'#879ca3');
+ const closed=posterior>.5;
+ box(gate.x,.25,gate.y+(closed?0:-.35),.075,closed?.055:.52,closed?.82:.055,'#ffba58');
+ for(const [x,z] of [[-.42,-.42],[size-.58,size-.58],[-.42,size-1.54],[size-1.52,-.42]])lamp(x,z);
+ function tree(x,z){
+  box(x,.01,z,.08,.34,.08,'#87684e');
+  for(const [y,r,height,col] of [[.21,.23,.48,'#376a62'],[.39,.18,.44,'#518774']]){
+   const pts=Array.from({length:7},(_,i)=>[x+r*Math.cos(i*.898),y,z+r*Math.sin(i*.898)]);
+   for(let i=0;i<7;i++)face([pts[i],pts[(i+1)%7],[x,y+height,z]],col,.8+.22*Math.cos(i*.898));
+  }
+ }
+ if(levelIndex===0||levelIndex===2)for(let i=0;i<size;i+=2){tree(-.43,i);tree(i,size-.48)}
+ // Rover body parts share one local coordinate frame.
+ 
+ const angle=view3D.heading;
+ function rover(x,y,z,a,b,c,col){
+  box(rx+x*Math.cos(angle)+z*Math.sin(angle),y,rz-x*Math.sin(angle)+z*Math.cos(angle),a,b,c,col,angle);
+ }
+ layer=4;floor(rx+.035,rz+.05,.48,.54,'#32464b',.047);
+ layer=5;for(const x of [-.20,.20])for(const z of [-.16,.16])rover(x,.045,z,.105,.15,.13,'#27343e');
+ rover(0,.14,0,.41,.13,.49,'#e6ddbf');rover(0,.27,-.05,.31,.13,.32,'#4e6c73');
+ rover(0,.4,-.05,.23,.065,.24,'#c4ff8e');rover(0,.25,.249,.30,.048,.02,'#94ffff');
+ rover(-.15,.26,-.18,.014,.23,.014,'#9aafb5');rover(-.15,.48,-.18,.035,.035,.035,'#ffc079');
+ const wave=(now-pingStart)/850;
+ if(wave>=0&&wave<1){const r=.13+wave*1.5;for(let i=0;i<36;i++){const a=i*Math.PI/18,b=(i+1)*Math.PI/18;face([[r,a],[r,b],[r+.025,b],[r+.025,a]].map(([rr,ang])=>[rx+rr*Math.cos(ang),.06,rz+rr*Math.sin(ang)]),'#8dffe1')}}
+ if(gpu){
+  gpu.draw(faces,canvas.width,canvas.height,[tx,ty,tz],[cy,sy,cp,sp],distance);ctx.drawImage(gpu.surface,0,0,w,h);
+ }else{
+ faces.sort((a,b)=>a.layer-b.layer||b.depth-a.depth);
+ for(const {pts,color} of faces){ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fillStyle=color;ctx.fill()}
+ }
+ for(const [pos,name] of [[[depot.x,.54,depot.y-.28],'DEPOT'],[[lab.x,1.15,lab.y-.42],ended?'LAB ONLINE':'RELAY LAB']]){
+  const [x,y,d]=project(pos);if(d<.15||x<30||x>w-30||y<30||y>h-15)continue;
+  ctx.font='bold 11px monospace';ctx.textAlign='center';const width=ctx.measureText(name).width+12;
+  ctx.fillStyle='#14232ee8';ctx.fillRect(x-width/2,y-11,width,16);ctx.fillStyle='#e2ebe3';ctx.fillText(name,x,y);
+ }
+ if((t<1||wave>=0&&wave<1))frame=requestAnimationFrame(paintCampus);
+}
+function repaint(){cancelAnimationFrame(frame);frame=requestAnimationFrame(paintCampus)}
+
+const viewport=$('district');
+function adjustZoom(delta){view3D.zoom=Math.max(6.2,Math.min(12,view3D.zoom+delta));repaint()}
+viewport.addEventListener('pointerdown',e=>{view3D.drag={x:e.clientX,y:e.clientY};viewport.setPointerCapture(e.pointerId)});
+viewport.addEventListener('pointermove',e=>{
+ if(!view3D.drag)return;
+ view3D.yaw-=(e.clientX-view3D.drag.x)*.009;
+ view3D.pitch=Math.max(.38,Math.min(1.20,view3D.pitch+(e.clientY-view3D.drag.y)*.006));
+ view3D.drag={x:e.clientX,y:e.clientY};repaint();
+});
+for(const type of ['pointerup','pointercancel','lostpointercapture'])viewport.addEventListener(type,()=>view3D.drag=null);
+viewport.addEventListener('wheel',e=>{e.preventDefault();adjustZoom(Math.sign(e.deltaY)*.4)},{passive:false});
+$('camMode').onclick=()=>{view3D.mode=view3D.mode==='orbit'?'follow':'orbit';$('camMode').textContent=view3D.mode==='orbit'?'Follow rover':'Campus view';repaint()};
+$('camLeft').onclick=()=>{view3D.yaw-=Math.PI/6;repaint()};$('camRight').onclick=()=>{view3D.yaw+=Math.PI/6;repaint()};
+$('zoomIn').onclick=()=>adjustZoom(-.7);$('zoomOut').onclick=()=>adjustZoom(.7);
+function drive(dx,dz){
+ if(ended)return;
+ const next={x:robot.x+dx,y:robot.y+dz};
+ if(next.x<0||next.x>=size||next.y<0||next.y>=size||campusMap[next.y][next.x]){
+  $('deliveryStatus').textContent='Road blocked. Choose another direction.';return;
+ }
+ if(dist(next,gate)===0 && 3-8*posterior< -1){rescan(true);return}
+ moveCourier(next);
+}
+const directions={w:[0,-1],a:[-1,0],s:[0,1],d:[1,0]};
+for(const [key,[dx,dz]] of Object.entries(directions))$('drive'+key).onclick=()=>drive(dx,dz);
+window.addEventListener('keydown',e=>{
+ const key=({KeyW:'w',KeyA:'a',KeyS:'s',KeyD:'d',ArrowUp:'w',ArrowLeft:'a',ArrowDown:'s',ArrowRight:'d'})[e.code]||e.key.toLowerCase();
+ if(e.target.tagName==='SELECT'||e.ctrlKey||e.altKey||e.metaKey||!directions[key]||e.repeat)return;
+ e.preventDefault();drive(...directions[key]);
+});
+window.addEventListener('resize',()=>{repaint()});
+
+function downloadText(name,source){
+ const link=document.createElement('a'),url=URL.createObjectURL(new Blob([source],{type:'text/plain;charset=utf-8'}));
+ link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$('getPy').onclick=()=>downloadText('campus_demo.py',"\"\"\"Campus relay delivery. Run: python campus_demo.py\"\"\"\nfrom heapq import heappop, heappush\n\nSTART, GOAL, GATE = (0, 2), (4, 2), (1, 2)\nWALLS = {(2, 1), (3, 3)}\n\n\ndef astar(risk):\n    \"\"\"Minimize movement cost plus expected delay at the gate.\"\"\"\n    def distance(cell):\n        return abs(cell[0] - GOAL[0]) + abs(cell[1] - GOAL[1])\n\n    queue = [(distance(START), 0, START)]\n    cost = {START: 0}\n    parent = {}\n    while queue:\n        _, g, cell = heappop(queue)\n        if g != cost[cell]:\n            continue\n        if cell == GOAL:\n            path = [cell]\n            while cell in parent:\n                cell = parent[cell]\n                path.append(cell)\n            return path[::-1], g\n        for dx, dy in [(0, -1), (1, 0), (0, 1), (-1, 0)]:\n            x, y = cell[0] + dx, cell[1] + dy\n            nxt = (x, y)\n            if not (0 <= x < 5 and 0 <= y < 5) or nxt in WALLS:\n                continue\n            new_cost = g + 1 + (4 * risk if nxt == GATE else 0)\n            if new_cost < cost.get(nxt, float(\"inf\")):\n                parent[nxt], cost[nxt] = cell, new_cost\n                heappush(queue, (new_cost + distance(nxt), new_cost, nxt))\n    return [], float(\"inf\")\n\n\ndef posterior(alert):\n    hit, false_alarm = (0.8, 0.2) if alert else (0.2, 0.8)\n    evidence = 0.3 * hit + 0.7 * false_alarm\n    return 0.3 * hit / evidence\n\n\ndef decision(risk, crosses_gate):\n    # One-step model. Move earns +3 if clear and -5 if blocked.\n    # Wait costs one turn. Future rewards have zero weight.\n    next_risk = risk if crosses_gate else 0\n    move, wait = 3 - 8 * next_risk, -1\n    return move, wait, \"MOVE\" if move >= wait else \"WAIT\"\n\n\nif __name__ == \"__main__\":\n    for alert in (False, True):\n        risk = posterior(alert)\n        route, cost = astar(risk)\n        direct = decision(risk, True)\n        planned = decision(risk, route[1] == GATE)\n        print(\"ALERT\" if alert else \"CLEAR\", f\"posterior={risk:.4f}\",\n              f\"cost={cost:.2f}\", f\"moves={len(route)-1}\", route)\n        print(\"Direct corridor:\", direct, \"Planned first step:\", planned)\n        assert abs(risk - (24/38 if alert else 6/62)) < 1e-9\n        assert len(route)-1 == (6 if alert else 4)\n        assert direct[2] == (\"WAIT\" if alert else \"MOVE\")\n        assert planned[2] == \"MOVE\"\n");
+$('getReadme').onclick=()=>downloadText('README.md',"# SIGNAL // BLACKOUT — Campus relay delivery\n\nOpen the HTML in a browser. The 3D delivery opens automatically. Choose one of four districts in the level selector, or finish a delivery and select Next district. The Python example and reference results below use the original 5x5 Relay Courtyard. Freight grates and shallow water add one turn; containers, barricades and deep water block movement. Rail crossings on red require a one-turn wait. Drag to orbit, scroll to zoom, or choose the follow-camera button. WASD or arrow keys drive on the campus grid; the dispatch button follows the recommended step. Deliver a replacement relay from the depot to the campus lab. Switch the sensor reading before dispatch to compare two reproducible cases.\n\n## Assumptions and integration\nCoordinates start at (0,0) in the top left. Only the gate can be blocked. The prior is 0.30, sensitivity 0.80 and false alarm rate 0.20. One observation supplies the posterior. A* charges 1 per step plus 4 times the posterior on entry to the gate. Manhattan distance is an admissible lower bound because each step costs at least 1. The one-step MDP compares MOVE (+3 clear, -5 blocked) and WAIT (-1 in either state) with no future reward. It uses the probability for the actual next cell on the selected route. WAIT spends one turn and takes a new reading. The opening signal is selectable. Subsequent readings are scripted CLEAR; each posterior becomes the next prior assuming conditionally independent observations of a fixed gate state. The Python example evaluates the two opening signals. Movement follows the current plan until new evidence or a strategy change triggers replanning.\n\n## Run and evaluate\nRun python campus_demo.py with Python 3. No packages required. The embedded assertions check both sensor cases.\nCLEAR: P(blocked)=0.0968, direct path 4 moves, cost 4.39, MOVE.\nALERT: P(blocked)=0.6316, A* detour 6 moves, cost 6.00, MOVE. Force the direct corridor to see WAIT (MOVE = -2.05 vs WAIT = -1).\nThese are model costs on a toy map. The direct route minimizes distance, while the detour lowers modeled cost after an alert.\n\n## Live defense\n1. Choose CLEAR and point out the gate and route.\n2. Change to ALERT. Explain why 0.24 / 0.38 changes both the gate cost and route.\n3. Compare A* with Direct corridor. Step the robot and explain the different actions.\n4. Run the Python example and explain its assertions.\n\nWhy Bayes? A sensor alert can be false. Why A*? A shortest geometric route can carry extra delay. Why a one-step MDP? The robot must decide whether the next move is worth the risk. A limitation is that only the gate is uncertain. A future version could learn its likelihoods from repeated deliveries and model how long blockages last.\n\nThe course demo and its Python implementation were developed with AI assistance. Each presenter should be ready to explain the assumptions, code and outcomes.\n");
+
+
+configureLevel(0);
+</script></body></html>
